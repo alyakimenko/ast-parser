@@ -14,8 +14,8 @@ public class BinaryExpression implements Node {
 
     @Override
     public double evaluate() {
-        double leftValue = leftChild.evaluate();
-        double rightValue = rightChild.evaluate();
+        double leftValue = this.leftChild.evaluate();
+        double rightValue = this.rightChild.evaluate();
         return operator.evaluate(leftValue, rightValue);
     }
 
