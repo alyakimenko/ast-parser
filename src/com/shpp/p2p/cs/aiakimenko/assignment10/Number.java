@@ -5,16 +5,12 @@ public class Number implements Node {
     private final double value;
 
     public Number(double value) {
-
         this.value = value;
-
     }
 
     @Override
     public double evaluate() {
-
         return this.value;
-
     }
 
 }

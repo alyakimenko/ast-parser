@@ -5,7 +5,7 @@
             "name": "CodeLens (Launch) - Main",
             "request": "launch",
             "mainClass": "com.shpp.p2p.cs.aiakimenko.assignment10.Main",
-            "args": "2+2/9+2*2"
+            "args": "2^3*2"
         }
     ]
 }
