@@ -4,8 +4,7 @@
             "type": "java",
             "name": "CodeLens (Launch) - Main",
             "request": "launch",
-            "mainClass": "com.shpp.p2p.cs.aiakimenko.assignment10.Calculator",
-            "args": "2+5"
+            "mainClass": "com.shpp.p2p.cs.aiakimenko.assignment10.Calculator"
         }
     ]
 }

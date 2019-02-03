@@ -52,6 +52,10 @@ public class Expression {
      * @return expression result
      */
     public static double calculate(String[] args) {
+        if (args == null) {
+            throw new IllegalArgumentException();
+        }
+        
         if (tailNode == null || !expression.equals(args[0])) {
             setVariablesHashMap(Arrays.copyOfRange(args, 1, args.length));
             expression = args[0];
