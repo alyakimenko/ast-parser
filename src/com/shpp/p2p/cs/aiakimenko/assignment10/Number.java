@@ -5,8 +5,14 @@ package com.shpp.p2p.cs.aiakimenko.assignment10;
  */
 public class Number implements Node {
 
+    /**
+     * Value of a number
+     */
     private final double value;
 
+    /**
+     * @param value number value for object
+     */
     public Number(double value) {
         this.value = value;
     }

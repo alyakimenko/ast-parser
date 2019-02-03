@@ -25,33 +25,72 @@ public class Expression {
     private static Map<String, Double> variables;
 
     /**
+     * Tail node
+     */
+    private static Node tailNode;
+
+    /**
+     * Input math expression
+     */
+    private static String expression;
+
+    /**
      * Gets an math expression and then returns a result of it
      * 
      * @param formula math expression string without variables
      * @return expression result
      */
-    public static double evaluate(String formula) {
+    public static double calculate(String formula) {
         return parse(formula).evaluate();
     }
 
     /**
-     * Gets an math expression and variables values and then returns a result of
-     * math expression
+     * Gets an math expression and variables values and then returns a result of it
      * 
      * @param args array in which the first element is math expression and others -
      *             variables
      * @return expression result
      */
-    public static double evaluate(String[] args) {
-        setVariablesHashMap(Arrays.copyOfRange(args, 1, args.length));
-        return parse(args[0]).evaluate();
+    public static double calculate(String[] args) {
+        if (tailNode == null || !expression.equals(args[0])) {
+            setVariablesHashMap(Arrays.copyOfRange(args, 1, args.length));
+            expression = args[0];
+            return parse(expression).evaluate();
+        } else {
+            setVariablesHashMap(Arrays.copyOfRange(args, 1, args.length));
+            resetVariablesValues(tailNode);
+            return tailNode.evaluate();
+        }
     }
 
-    private static void setVariablesHashMap(String[] copyOfRange) {
+    /**
+     * Resets variables values
+     * 
+     * @param node Tail node
+     */
+    private static void resetVariablesValues(Node node) {
+        if (node instanceof Variable) {
+            Variable newVariable = (Variable) node;
+            newVariable.setValue(variables.get(newVariable.getName()));
+        }
+
+        if (node instanceof BinaryExpression) {
+            BinaryExpression tempExpr = (BinaryExpression) node;
+            resetVariablesValues(tempExpr.getLeftChild());
+            resetVariablesValues(tempExpr.getRightChild());
+        }
+    }
+
+    /**
+     * Sets a variables hashmap
+     * 
+     * @param vars array of all expression variables
+     */
+    private static void setVariablesHashMap(String[] vars) {
         variables = new HashMap<>();
 
-        for (String pair : copyOfRange) {
-            String[] entry = pair.split("=");
+        for (String var : vars) {
+            String[] entry = var.split("=");
             variables.put(entry[0].trim(), Double.valueOf(entry[1].trim()));
         }
     }
@@ -70,15 +109,18 @@ public class Expression {
             int startIndex = currentIndex;
             char currentSymbol = input.charAt(currentIndex++);
 
-            if (Character.isWhitespace(currentSymbol))
+            if (Character.isWhitespace(currentSymbol)) {
                 continue;
+            }
 
+            // if it's operator (+, -, /, *, ^)
             if (afterOperand) {
                 afterOperand = !afterOperand;
                 proccesOperator(currentSymbol);
                 continue;
             }
 
+            // if it's variable or number
             afterOperand = !afterOperand;
             while (currentIndex < input.length()) {
                 currentSymbol = input.charAt(currentIndex);
@@ -90,7 +132,6 @@ public class Expression {
             }
 
             String operandContext = input.substring(startIndex, currentIndex);
-
             if (Character.isAlphabetic(input.charAt(startIndex)) && variables.containsKey(operandContext)) {
                 operands.push(new Variable(operandContext, variables.get(operandContext)));
             } else {
@@ -98,7 +139,7 @@ public class Expression {
             }
         }
 
-        return getDeepestNode();
+        return getTailNode();
     }
 
     /**
@@ -122,17 +163,18 @@ public class Expression {
      * 
      * @return the deepest node from which all calculations will occur
      */
-    private static Node getDeepestNode() {
+    private static Node getTailNode() {
         while (!operators.isEmpty()) {
             Object operator = operators.pop();
             createNewOperand((BinaryOperator) operator, operands);
         }
 
-        Node node = operands.pop();
-        if (!operands.isEmpty())
+        tailNode = operands.pop();
+        if (!operands.isEmpty()) {
             throw new IllegalArgumentException();
+        }
 
-        return node;
+        return tailNode;
     }
 
     /**

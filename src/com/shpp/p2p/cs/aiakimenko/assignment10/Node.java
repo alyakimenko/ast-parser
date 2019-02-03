@@ -5,6 +5,9 @@ package com.shpp.p2p.cs.aiakimenko.assignment10;
  */
 public interface Node {
 
+    /**
+     * @return result of evaluating node
+     */
     double evaluate();
 
 }
