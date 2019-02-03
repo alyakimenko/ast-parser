@@ -119,8 +119,17 @@ public class Expression {
 
             // if it's operator (+, -, /, *, ^)
             if (afterOperand) {
+                if (currentSymbol == ')') {
+                    proccesParenthesesOperator();
+                    continue;
+                }
                 afterOperand = !afterOperand;
                 proccesOperator(currentSymbol);
+                continue;
+            }
+
+            if (currentSymbol == '(') {
+                operators.push(Parentheses.LEFT);
                 continue;
             }
 
@@ -146,6 +155,13 @@ public class Expression {
         return getTailNode();
     }
 
+    private static void proccesParenthesesOperator() {
+        Object operator;
+        while (!operators.isEmpty() && ((operator = operators.pop()) != Parentheses.LEFT)) {
+            createNewOperand((BinaryOperator) operator, operands);
+        }
+    }
+
     /**
      * Checks the operator for precedence level and push it into oparetors stack
      * 
@@ -155,6 +171,7 @@ public class Expression {
         BinaryOperator operator = BinaryOperator.fromSymbol(operatorSymbol);
 
         while (!operators.isEmpty()
+                && (operators.peek() != Parentheses.LEFT) 
                 && ((BinaryOperator) operators.peek()).getPrecedence() >= operator.getPrecedence()) {
             createNewOperand((BinaryOperator) operators.pop(), operands);
         }
@@ -170,6 +187,8 @@ public class Expression {
     private static Node getTailNode() {
         while (!operators.isEmpty()) {
             Object operator = operators.pop();
+            if (operator == Parentheses.LEFT)
+                throw new IllegalArgumentException();
             createNewOperand((BinaryOperator) operator, operands);
         }
 
