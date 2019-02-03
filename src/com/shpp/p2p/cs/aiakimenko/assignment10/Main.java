@@ -4,7 +4,11 @@ public class Main {
 
     public static void main(String[] args) {
 
-        Expression.evaluate(args);
+        try {
+            System.out.println(Expression.evaluate(args));
+        } catch(Exception ex) {
+            System.out.println("Error! Try again, and check out your input.");
+        }
 
     }
 
