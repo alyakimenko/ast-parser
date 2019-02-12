@@ -1,7 +1,9 @@
-package com.shpp.p2p.cs.aiakimenko.assignment10;
+package com.shpp.p2p.cs.aiakimenko.assignment11;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
- * Represents a Binary expression node (with left, right childs and operator) of AST
+ * Represents a Binary expression node (with left, right child and operator) of AST
  */
 public class BinaryExpression implements Node {
 
@@ -23,14 +25,14 @@ public class BinaryExpression implements Node {
      * @param operator operator between nodes
      * @param rightChild right node of expression
      */
-    public BinaryExpression(Node leftChild, BinaryOperator operator, Node rightChild) {
+    BinaryExpression(Node leftChild, BinaryOperator operator, Node rightChild) {
         this.leftChild = leftChild;
         this.operator = operator;
         this.rightChild = rightChild;
     }
 
     @Override
-    public double evaluate() {
+    public double evaluate() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         double leftValue = this.leftChild.evaluate();
         double rightValue = this.rightChild.evaluate();
         return operator.evaluate(leftValue, rightValue);
@@ -39,14 +41,14 @@ public class BinaryExpression implements Node {
     /**
      * @return the leftChild
      */
-    public Node getLeftChild() {
+    Node getLeftChild() {
         return this.leftChild;
     }
 
     /**
      * @return the rightChild
      */
-    public Node getRightChild() {
+    Node getRightChild() {
         return this.rightChild;
     }
 

@@ -1,5 +1,6 @@
-package com.shpp.p2p.cs.aiakimenko.assignment10;
+package com.shpp.p2p.cs.aiakimenko.assignment11;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,7 +9,7 @@ import java.util.Stack;
 /**
  * The class represents a parser of mathematical expressions and evaluator of it
  */
-public class Expression {
+class Expression {
 
     /**
      * Operands stack
@@ -40,7 +41,7 @@ public class Expression {
      * @param formula math expression string without variables
      * @return expression result
      */
-    public static double calculate(String formula) {
+    static double calculate(String formula) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         return parse(formula).evaluate();
     }
 
@@ -51,7 +52,7 @@ public class Expression {
      *             variables
      * @return expression result
      */
-    public static double calculate(String[] args) {
+    static double calculate(String[] args) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (args == null) {
             throw new IllegalArgumentException();
         }
@@ -105,9 +106,14 @@ public class Expression {
      * @param input math expression string
      * @return the deepest node which will be evaluate
      */
-    public static Node parse(String input) {
+    private static Node parse(String input) {
         int currentIndex = 0;
+        byte parenthesesCount = 0;
+        
         boolean afterOperand = false;
+        boolean isFunction = false;
+
+        FunctionExpr temp = null;
 
         while (currentIndex < input.length()) {
             int startIndex = currentIndex;
@@ -120,15 +126,26 @@ public class Expression {
             // if it's operator (+, -, /, *, ^)
             if (afterOperand) {
                 if (currentSymbol == ')') {
-                    proccesParenthesesOperator();
+                    processParenthesesOperator();
+                    if (isFunction) {
+                        temp.setArg(operands.peek());
+                        --parenthesesCount;
+                        if (parenthesesCount == 0) {
+                            isFunction = false;
+                            operands.remove(temp.getArg());
+                        }
+                    }
                     continue;
                 }
                 afterOperand = !afterOperand;
-                proccesOperator(currentSymbol);
+                processOperator(currentSymbol);
                 continue;
             }
 
             if (currentSymbol == '(') {
+                if (isFunction) {
+                    ++parenthesesCount;
+                }
                 operators.push(Parentheses.LEFT);
                 continue;
             }
@@ -137,15 +154,19 @@ public class Expression {
             afterOperand = !afterOperand;
             while (currentIndex < input.length()) {
                 currentSymbol = input.charAt(currentIndex);
-                if ((!Character.isDigit(currentSymbol) && (currentSymbol != '.'))
-                        && !Character.isAlphabetic(currentSymbol)) {
+                if ((!Character.isDigit(currentSymbol) && (currentSymbol != '.')) && !Character.isAlphabetic(currentSymbol)) {
                     break;
                 }
                 currentIndex++;
             }
 
-            String operandContext = input.substring(startIndex, currentIndex);
-            if (Character.isAlphabetic(input.charAt(startIndex)) && variables.containsKey(operandContext)) {
+            String operandContext = input.substring(startIndex, currentIndex);  
+            if (operandContext.matches("sin|cos|tan|atan|log10|log2|sqrt")) {
+                temp = new FunctionExpr(operandContext, null);
+                operands.push(temp);
+                isFunction = true;
+                afterOperand = !afterOperand;
+            } else if (Character.isAlphabetic(input.charAt(startIndex)) && variables.containsKey(operandContext)) {
                 operands.push(new Variable(operandContext, variables.get(operandContext)));
             } else {
                 operands.push(new Number(Double.valueOf(operandContext)));
@@ -155,7 +176,10 @@ public class Expression {
         return getTailNode();
     }
 
-    private static void proccesParenthesesOperator() {
+    /**
+     * Checks the Parentheses operator and push its body into operands stack
+     */
+    private static void processParenthesesOperator() {
         Object operator;
         while (!operators.isEmpty() && ((operator = operators.pop()) != Parentheses.LEFT)) {
             createNewOperand((BinaryOperator) operator, operands);
@@ -163,12 +187,12 @@ public class Expression {
     }
 
     /**
-     * Checks the operator for precedence level and push it into oparetors stack
+     * Checks the operator for precedence level and push it into operators stack
      * 
      * @param operatorSymbol input operator symbol
      */
-    private static void proccesOperator(char operatorSymbol) {
-        BinaryOperator operator = BinaryOperator.fromSymbol(operatorSymbol);
+    private static void processOperator(char operatorSymbol) {
+        BinaryOperator operator = BinaryOperator.getFromSymbol(operatorSymbol);
 
         while (!operators.isEmpty()
                 && (operators.peek() != Parentheses.LEFT) 
@@ -187,8 +211,9 @@ public class Expression {
     private static Node getTailNode() {
         while (!operators.isEmpty()) {
             Object operator = operators.pop();
-            if (operator == Parentheses.LEFT)
+            if (operator == Parentheses.LEFT) {
                 throw new IllegalArgumentException();
+            }
             createNewOperand((BinaryOperator) operator, operands);
         }
 
@@ -201,7 +226,7 @@ public class Expression {
     }
 
     /**
-     * Creates new operand with operator and two childs (operands)
+     * Creates new operand with operator and two children (operands)
      * 
      * @param operator type of operator
      * @param operands operands stack from which two values will be taken (left

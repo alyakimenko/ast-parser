@@ -2,10 +2,17 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - Calculator",
+            "request": "launch",
+            "mainClass": "com.shpp.p2p.cs.aiakimenko.assignment11.Calculator",
+            "args": "log2(5)"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - Main",
             "request": "launch",
             "mainClass": "com.shpp.p2p.cs.aiakimenko.assignment10.Calculator",
-            "args": "(2+5)*10"
+            "args": "sin(2+3)"
         }
     ]
 }
